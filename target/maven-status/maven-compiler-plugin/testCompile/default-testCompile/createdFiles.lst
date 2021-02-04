@@ -1,0 +1,4 @@
+co\arnaldi\BaseTestMockCase.class
+co\arnaldi\operation\TopUpOperationTest.class
+co\arnaldi\operation\LoginOperationTest.class
+co\arnaldi\operation\PayOperationTest.class

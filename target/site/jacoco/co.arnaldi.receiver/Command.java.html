@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Command.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.receiver</a> &gt; <span class="el_source">Command.java</span></div><h1>Command.java</h1><pre class="source lang-java linenums">package co.arnaldi.receiver;
+
+import java.util.HashMap;
+import java.util.Map;
+
+<span class="nc" id="L6">public enum Command {</span>
+
+<span class="nc" id="L8">    LOGIN(&quot;login&quot;) ,</span>
+<span class="nc" id="L9">    TOPUP(&quot;topup&quot;) ,</span>
+<span class="nc" id="L10">    PAY(&quot;pay&quot;) ,</span>
+<span class="nc" id="L11">    LOGOUT(&quot;logout&quot;) ,</span>
+<span class="nc" id="L12">    EXIT(&quot;exit&quot;);</span>
+
+    private final String value;
+
+<span class="nc" id="L16">    Command(String value){</span>
+<span class="nc" id="L17">        this.value = value;</span>
+<span class="nc" id="L18">    }</span>
+
+<span class="nc" id="L20">    private static final Map&lt;String, Command&gt; map = new HashMap&lt;&gt;(values().length, 1);</span>
+
+    static {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        for(Command c : values()) map.put(c.value, c);</span>
+<span class="nc" id="L24">    }</span>
+
+    public static Command of(String value){
+<span class="nc" id="L27">        Command result = map.get(value);</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if(result == null){</span>
+<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Invalid command: &quot;+ value);</span>
+        }
+<span class="nc" id="L31">        return result;</span>
+    }
+
+    public static boolean contains(String command){
+<span class="nc" id="L35">        boolean result = true;</span>
+        try{
+<span class="nc" id="L37">           Command commandTemp =  of(command);</span>
+<span class="nc" id="L38">        }catch (IllegalArgumentException iae){</span>
+<span class="nc" id="L39">            result = false;</span>
+<span class="nc" id="L40">        }</span>
+<span class="nc" id="L41">        return result;</span>
+    }
+
+
+    @Override
+    public String toString() {
+<span class="nc" id="L47">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

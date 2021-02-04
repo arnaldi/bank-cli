@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginOperation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.operation</a> &gt; <span class="el_source">LoginOperation.java</span></div><h1>LoginOperation.java</h1><pre class="source lang-java linenums">package co.arnaldi.operation;
+
+import co.arnaldi.dto.AccountDto;
+import co.arnaldi.dto.ActiveAccount;
+import co.arnaldi.model.Account;
+import co.arnaldi.service.AccountService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+
+@Component(&quot;LOGINOperation&quot;)
+public class LoginOperation extends CommandOperation {
+
+    private ActiveAccount activeAccount;
+
+    private AccountService accountService;
+
+<span class="fc" id="L22">    private Logger logger = LoggerFactory.getLogger(LoginOperation.class);</span>
+
+<span class="fc" id="L24">    public LoginOperation(AccountService accountService, ActiveAccount activeAccount){</span>
+<span class="fc" id="L25">        this.accountService = accountService;</span>
+<span class="fc" id="L26">        this.activeAccount = activeAccount;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    @Transactional
+    public boolean execute() throws IllegalArgumentException {
+<span class="fc" id="L32">        validateInput();</span>
+<span class="fc" id="L33">        Account activeAcc = accountService.getAccountLogin(this.getArgs()[1]);</span>
+<span class="fc" id="L34">        activeAccount.setAccount(activeAcc);</span>
+<span class="fc" id="L35">        AccountDto account = accountService.getAccountDto(activeAcc);</span>
+<span class="fc" id="L36">        logger.info(&quot;Hello &quot;+account.getName() + &quot;!&quot;);</span>
+<span class="fc" id="L37">        logger.info(&quot;Your balance is &quot; +account.getBalance());</span>
+<span class="pc bnc" id="L38" title="All 2 branches missed.">        account.getDebts().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0).forEach(debt -&gt; logger.info(&quot;Owing &quot;+debt.getAmount() +&quot; to &quot;+ debt.getCreditorAccountName()));</span>
+<span class="pc bnc" id="L39" title="All 2 branches missed.">        account.getCredits().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0 ).forEach(debt -&gt; logger.info(&quot;Owing &quot;+debt.getAmount() +&quot; from &quot;+ debt.getDebitorAccountName()));</span>
+<span class="fc" id="L40">        return true;</span>
+    }
+
+    @Override
+    void validateInput() throws IllegalArgumentException {
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if(this.getArgs().length &lt; 2){</span>
+<span class="fc" id="L46">            throw new IllegalArgumentException(&quot;Please input your name for login&quot;);</span>
+        }
+<span class="fc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

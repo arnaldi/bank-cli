@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopUpOperation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.operation</a> &gt; <span class="el_source">TopUpOperation.java</span></div><h1>TopUpOperation.java</h1><pre class="source lang-java linenums">package co.arnaldi.operation;
+
+import co.arnaldi.dto.AccountDto;
+import co.arnaldi.dto.ActiveAccount;
+import co.arnaldi.model.Account;
+import co.arnaldi.service.AccountService;
+import co.arnaldi.service.TopUpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+
+@Component(&quot;TOPUPOperation&quot;)
+public class TopUpOperation extends CommandOperation{
+
+    private ActiveAccount activeAccount;
+
+    private AccountService accountService;
+
+    private TopUpService topUpService;
+
+<span class="fc" id="L24">    private Logger logger = LoggerFactory.getLogger(TopUpOperation.class);</span>
+
+<span class="fc" id="L26">    public TopUpOperation(TopUpService topUpService, AccountService accountService, ActiveAccount activeAccount){</span>
+<span class="fc" id="L27">        this.topUpService = topUpService;</span>
+<span class="fc" id="L28">        this.accountService = accountService;</span>
+<span class="fc" id="L29">        this.activeAccount = activeAccount;</span>
+<span class="fc" id="L30">    }</span>
+
+    @Override
+    @Transactional
+    boolean execute() throws IllegalArgumentException {
+<span class="fc" id="L35">        validateInput();</span>
+<span class="fc" id="L36">        Account account = topUpService.topup(activeAccount.getAccount(), new BigDecimal(this.getArgs()[1]));</span>
+<span class="fc" id="L37">        AccountDto accountDto = accountService.getAccountDto(account);</span>
+<span class="fc" id="L38">        logger.info(&quot; Your balance is : &quot;+accountDto.getBalance());</span>
+<span class="pc bnc" id="L39" title="All 2 branches missed.">        accountDto.getDebts().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0).forEach(debt -&gt; logger.info(&quot;Owing &quot;+debt.getAmount() +&quot;to &quot;+ debt.getCreditorAccountName()));</span>
+<span class="pc bnc" id="L40" title="All 2 branches missed.">        accountDto.getCredits().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0 ).forEach(debt -&gt; logger.info(&quot;Owing &quot;+debt.getAmount() +&quot;from &quot;+ debt.getDebitorAccountName()));</span>
+<span class="fc" id="L41">        return true;</span>
+    }
+
+    @Override
+     void validateInput() throws IllegalArgumentException{
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if(this.getArgs().length &lt; 2){</span>
+<span class="fc" id="L47">            throw new IllegalArgumentException(&quot;Please input your balance for topup&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L51">            BigDecimal topUpAmt = new BigDecimal(this.getArgs()[1]);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if(topUpAmt.compareTo(BigDecimal.ZERO) &lt; 1) throw new IllegalArgumentException(&quot;Not Valid Amount for Top Up&quot;);</span>
+<span class="fc" id="L53">        }catch (NumberFormatException nfe){</span>
+<span class="fc" id="L54">            throw new IllegalArgumentException(&quot;Not Valid Amount for Top Up&quot;);</span>
+<span class="fc" id="L55">        }</span>
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if(activeAccount.getAccount() == null){</span>
+<span class="fc" id="L58">            throw new UnsupportedOperationException(&quot;Please login first before call this command&quot;);</span>
+        }
+
+<span class="fc" id="L61">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

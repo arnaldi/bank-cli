@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PayOperation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.operation</a> &gt; <span class="el_source">PayOperation.java</span></div><h1>PayOperation.java</h1><pre class="source lang-java linenums">package co.arnaldi.operation;
+
+import co.arnaldi.dto.AccountDto;
+import co.arnaldi.dto.ActiveAccount;
+import co.arnaldi.model.Account;
+import co.arnaldi.service.AccountService;
+import co.arnaldi.service.PayService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component(&quot;PAYOperation&quot;)
+public class PayOperation extends CommandOperation{
+
+    private ActiveAccount activeAccount;
+
+    private AccountService accountService;
+
+    private PayService payService;
+
+<span class="fc" id="L28">    private Logger logger = LoggerFactory.getLogger(PayOperation.class);</span>
+
+<span class="fc" id="L30">    private final int divider = 5;</span>
+
+<span class="fc" id="L32">    public  PayOperation(PayService payService, AccountService accountService, ActiveAccount activeAccount){</span>
+<span class="fc" id="L33">        this.payService = payService;</span>
+<span class="fc" id="L34">        this.accountService = accountService;</span>
+<span class="fc" id="L35">        this.activeAccount = activeAccount;</span>
+<span class="fc" id="L36">    }</span>
+
+    @Override
+    @Transactional
+    boolean execute() throws IllegalArgumentException {
+<span class="fc" id="L41">        validateInput();</span>
+<span class="fc" id="L42">        BigDecimal payAmount = new BigDecimal(this.getArgs()[2]).setScale(2,BigDecimal.ROUND_FLOOR);</span>
+        //simulate pay in parts
+<span class="fc" id="L44">        List&lt;BigDecimal&gt; amountList = divideAmt(payAmount);</span>
+<span class="fc" id="L45">        amountList.stream().forEach(amount -&gt; payService.pay(activeAccount.getAccount(), this.getArgs()[1], amount));</span>
+<span class="fc" id="L46">        Account account = accountService.getAccountByName(activeAccount.getAccount().getName());</span>
+<span class="fc" id="L47">        AccountDto accountDto = accountService.getAccountDto(account);</span>
+<span class="fc" id="L48">        logger.info(&quot; Your balance is : &quot;+account.getBalance());</span>
+<span class="pc bnc" id="L49" title="All 2 branches missed.">        accountDto.getDebts().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0).forEach(debt -&gt; logger.info(&quot; Owing &quot;+debt.getAmount() +&quot; to &quot;+ debt.getCreditorAccountName()));</span>
+<span class="pc bnc" id="L50" title="All 2 branches missed.">        accountDto.getCredits().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0 ).forEach(debt -&gt; logger.info(&quot; Owing &quot;+debt.getAmount() +&quot; from &quot;+ debt.getDebitorAccountName()));</span>
+<span class="fc" id="L51">        return true;</span>
+    }
+
+    @Override
+    void validateInput() throws IllegalArgumentException {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if(this.getArgs().length &lt; 3){</span>
+<span class="fc" id="L57">            throw new IllegalArgumentException(&quot;Please input using the following format : pay &lt;destination&gt; &lt;amount&gt;&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L61">            BigDecimal payAmt = new BigDecimal(this.getArgs()[2]);</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            if(payAmt.compareTo(BigDecimal.ZERO) &lt; 1) throw new IllegalArgumentException(&quot;Not Valid Amount for Pay&quot;);</span>
+<span class="fc" id="L63">        }catch (NumberFormatException nfe){</span>
+<span class="fc" id="L64">            throw new IllegalArgumentException(&quot;Not Valid Amount for Pay&quot;);</span>
+<span class="fc" id="L65">        }</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if(activeAccount.getAccount() == null){</span>
+<span class="fc" id="L68">            throw new UnsupportedOperationException(&quot;Please login first before call this command&quot;);</span>
+        }
+
+<span class="fc" id="L71">    }</span>
+
+    private List&lt;BigDecimal&gt; divideAmt(BigDecimal amount){
+<span class="fc" id="L74">        List&lt;BigDecimal&gt; returnVal = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L75">        BigDecimal dividerBigDecimal = BigDecimal.valueOf(divider);</span>
+<span class="fc" id="L76">        BigDecimal divideResult = amount.divide(dividerBigDecimal,BigDecimal.ROUND_FLOOR);</span>
+<span class="fc" id="L77">        BigDecimal tempValue = BigDecimal.ZERO;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for(int i = 0 ; i &lt; divider; i++){</span>
+<span class="fc" id="L79">            returnVal.add(divideResult);</span>
+<span class="fc" id="L80">            tempValue = tempValue.add(divideResult);</span>
+        }
+<span class="fc" id="L82">        tempValue = tempValue.setScale(2,BigDecimal.ROUND_FLOOR);</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if(tempValue.compareTo(amount) &lt; 0){</span>
+<span class="nc" id="L84">            BigDecimal amt = amount.subtract(tempValue);</span>
+<span class="nc" id="L85">            returnVal.add(amt);</span>
+        }
+<span class="fc" id="L87">        return returnVal;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

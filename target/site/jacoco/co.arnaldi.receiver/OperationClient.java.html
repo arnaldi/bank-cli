@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OperationClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.receiver</a> &gt; <span class="el_source">OperationClient.java</span></div><h1>OperationClient.java</h1><pre class="source lang-java linenums">package co.arnaldi.receiver;
+
+import co.arnaldi.operation.CommandOperation;
+import co.arnaldi.operation.CommandOperationExecutor;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
+@Component
+public class OperationClient {
+
+    private final BeanFactory beanFactory;
+    private static final String OPERATION_NAME_SUFFIX= &quot;Operation&quot;;
+
+    private CommandOperationExecutor commandOperationExecutor;
+
+<span class="nc" id="L18">    public OperationClient(BeanFactory beanFactory, CommandOperationExecutor commandOperationExecutor) {</span>
+<span class="nc" id="L19">        this.beanFactory = beanFactory;</span>
+<span class="nc" id="L20">        this.commandOperationExecutor = commandOperationExecutor;</span>
+<span class="nc" id="L21">    }</span>
+
+    public boolean execute(String[] args) throws UnsupportedOperationException{
+<span class="nc" id="L24">        boolean result = false;</span>
+<span class="nc bnc" id="L25" title="All 4 branches missed.">        if(args == null || args.length == 0){</span>
+<span class="nc" id="L26">            throw new UnsupportedOperationException(&quot;no command&quot;);</span>
+        }
+
+<span class="nc" id="L29">        String commandArg = args[0];</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if(!Command.contains(commandArg)){</span>
+<span class="nc" id="L31">            throw new UnsupportedOperationException(&quot;Command not exist&quot;);</span>
+        }
+
+<span class="nc" id="L34">        Command commandEnum = Command.of(commandArg);</span>
+<span class="nc" id="L35">        CommandOperation operation = beanFactory.getBean(getOperationBeanName(commandEnum.name()), CommandOperation.class);</span>
+<span class="nc" id="L36">        operation.setArgs(args);</span>
+<span class="nc" id="L37">        return commandOperationExecutor.executeOperation(operation);</span>
+
+    }
+
+    private String getOperationBeanName(String name){
+<span class="nc" id="L42">        return name + OPERATION_NAME_SUFFIX;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

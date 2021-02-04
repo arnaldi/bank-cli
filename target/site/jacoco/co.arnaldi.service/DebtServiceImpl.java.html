@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebtServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.service</a> &gt; <span class="el_source">DebtServiceImpl.java</span></div><h1>DebtServiceImpl.java</h1><pre class="source lang-java linenums">package co.arnaldi.service;
+
+import co.arnaldi.model.Account;
+import co.arnaldi.model.Debt;
+import co.arnaldi.repository.DebtRepository;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class DebtServiceImpl implements DebtService {
+
+    private DebtRepository debtRepository;
+
+<span class="nc" id="L17">    public DebtServiceImpl(DebtRepository debtRepository){</span>
+<span class="nc" id="L18">        this.debtRepository = debtRepository;</span>
+<span class="nc" id="L19">    }</span>
+
+    @Override
+    @Transactional
+    public boolean checkIfGotDebt(Account account) {
+<span class="nc" id="L24">        boolean result = false;</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (debtRepository.getListOfCreditor(account).size() &gt; 0 ){</span>
+<span class="nc" id="L26">            result = true;</span>
+        }
+<span class="nc" id="L28">        return result;</span>
+    }
+
+    @Override
+    @Transactional
+    public List&lt;Debt&gt; getCreditors(Account account) {
+<span class="nc" id="L34">        return debtRepository.getListOfCreditor(account);</span>
+    }
+
+    @Override
+    @Transactional
+    public List&lt;Debt&gt; getDebitors(Long accountId) {
+<span class="nc" id="L40">        return debtRepository.getListOfDebitor(accountId);</span>
+    }
+
+    @Override
+    @Transactional
+    public Optional&lt;Debt&gt; getDebtBaseOnCreditorId(Account debitorAccount, Long creditorAccountId) {
+<span class="nc" id="L46">        return debtRepository.getDebtBaseOnDebitorAndCreditor(debitorAccount, creditorAccountId);</span>
+    }
+
+    @Override
+    @Transactional
+    public Debt save(Debt debt){
+<span class="nc" id="L52">        return debtRepository.save(debt);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

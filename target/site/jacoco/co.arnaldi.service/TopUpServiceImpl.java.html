@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TopUpServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ocbc-assignment</a> &gt; <a href="index.source.html" class="el_package">co.arnaldi.service</a> &gt; <span class="el_source">TopUpServiceImpl.java</span></div><h1>TopUpServiceImpl.java</h1><pre class="source lang-java linenums">package co.arnaldi.service;
+
+import co.arnaldi.dto.ActiveAccount;
+import co.arnaldi.model.Account;
+import co.arnaldi.model.Debt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class TopUpServiceImpl implements TopUpService {
+
+    private ActiveAccount activeAccount;
+
+    private DebtService debtService;
+
+    private AccountService accountService;
+
+    private TransactionService transactionService;
+
+<span class="nc" id="L25">    public TopUpServiceImpl(ActiveAccount activeAccount, DebtService debtService, AccountService accountService, TransactionService transactionService) {</span>
+<span class="nc" id="L26">        this.activeAccount = activeAccount;</span>
+<span class="nc" id="L27">        this.debtService = debtService;</span>
+<span class="nc" id="L28">        this.accountService = accountService;</span>
+<span class="nc" id="L29">        this.transactionService = transactionService;</span>
+<span class="nc" id="L30">    }</span>
+
+    @Override
+    @Transactional
+    public Account topup(Account account, BigDecimal topUpAmt) throws IllegalArgumentException{
+
+<span class="nc" id="L36">        BigDecimal balance = account.getBalance();</span>
+
+        //check if got debt or not
+        /*
+            if got debt, use topup amt to reduce debt first. make transactions. if still got remaining topUpAmt after pay debt, then top up balance.
+            if no debt, straight to top up
+         */
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        List&lt;Debt&gt; remainingDebts = account.getDebts().stream().filter(d -&gt; d.getAmount().compareTo(BigDecimal.ZERO) &gt; 0).collect(Collectors.toList());</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        for (Debt debt: remainingDebts) {</span>
+
+            BigDecimal debtAmt;
+            // reduce top up amt to debt amt
+            // update debt
+            //make topup
+<span class="nc" id="L52">            debtAmt = BigDecimal.ZERO;</span>
+<span class="nc" id="L53">            int compare = topUpAmt.compareTo(debt.getAmount());</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (compare &gt;= 0){</span>
+<span class="nc" id="L55">                topUpAmt = topUpAmt.subtract(debt.getAmount());</span>
+<span class="nc" id="L56">                debt.setAmount(BigDecimal.ZERO);</span>
+<span class="nc" id="L57">                debtService.save(debt);</span>
+<span class="nc" id="L58">                transactionService.doTransaction(account,debt.getCreditorAccountId(),debt.getAmount(),false);</span>
+            }else{
+<span class="nc" id="L60">                debtAmt = debt.getAmount().subtract(topUpAmt);</span>
+<span class="nc" id="L61">                topUpAmt = BigDecimal.ZERO;</span>
+<span class="nc" id="L62">                debt.setAmount(debtAmt);</span>
+<span class="nc" id="L63">                debtService.save(debt);</span>
+<span class="nc" id="L64">                break;</span>
+            }
+<span class="nc" id="L66">        }</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if(topUpAmt.compareTo(BigDecimal.ZERO) &gt; 0) transactionService.doTopUp(account,topUpAmt);</span>
+
+<span class="nc" id="L70">        accountService.saveSuppliedAcc(account);</span>
+
+
+
+<span class="nc" id="L74">        return account;</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
